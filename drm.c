@@ -21,6 +21,8 @@
  * SOFTWARE.
  */
 
+#define _BSD_SOURCE /* Required for major */
+
 #include "drm.h"
 #include "drm-private.h"
 

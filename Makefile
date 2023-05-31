@@ -88,7 +88,7 @@ WLD_PACKAGE_CFLAGS ?= $(call pkgconfig,$(WLD_PACKAGES),cflags,CFLAGS)
 WLD_PACKAGE_LIBS   ?= $(call pkgconfig,$(WLD_PACKAGES),libs,LIBS)
 
 FINAL_CFLAGS = $(CFLAGS) -fvisibility=hidden -std=c99 -Wvla
-FINAL_CPPFLAGS = $(CPPFLAGS) -D_XOPEN_SOURCE=700
+FINAL_CPPFLAGS = $(CPPFLAGS) -D_XOPEN_SOURCE=800
 
 # Warning/error flags
 FINAL_CFLAGS += -Werror=implicit-function-declaration -Werror=implicit-int \
@@ -155,7 +155,7 @@ libwld.a: $(WLD_STATIC_OBJECTS)
 	$(call quiet,AR) cr $@ $^
 
 $(WLD_LIB): $(WLD_SHARED_OBJECTS)
-	$(link) $(WLD_PACKAGE_LIBS) -shared -Wl,-soname,$(WLD_LIB_SONAME),-no-undefined
+	$(link) $(WLD_PACKAGE_LIBS) -l c -shared -Wl,-soname,$(WLD_LIB_SONAME),-no-undefined
 
 $(WLD_LIB_SONAME) $(WLD_LIB_LINK): $(WLD_LIB)
 	$(call quiet,SYM,ln -sf) $< $@
