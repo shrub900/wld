@@ -21,13 +21,14 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE /* Required for mkostemp */
+#define _GNU_SOURCE /* Required for mkostemp on glibc */
 
 #include "pixman.h"
 #include "wayland-private.h"
 #include "wayland.h"
 #include "wld-private.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -177,8 +178,16 @@ context_create_buffer(struct wld_context *base,
 
 	unlink(name);
 
-	if (posix_fallocate(fd, 0, size) != 0 && ftruncate(fd, size) != 0)
+#if defined(_POSIX_ADVISORY_INFO) && _POSIX_ADVISORY_INFO >= 0
+	int err;
+	if ((err = posix_fallocate(fd, 0, size)) != 0) {
+		if ((err != ENOTSUP && err != EOPNOTSUPP) || ftruncate(fd, size) != 0)
+			goto error2;
+	}
+#else
+	if (ftruncate(fd, size) != 0)
 		goto error2;
+#endif
 
 	if (!(pool = wl_shm_create_pool(context->wl, fd, size)))
 		goto error2;
